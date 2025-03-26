@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+    id("org.jetbrains.kotlin.kapt")
+
 }
 
 android {
@@ -51,6 +53,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -61,9 +64,23 @@ dependencies {
 
 
 
-    implementation (libs.androidx.material.icons.extended)   // Material 3 Icons
+    implementation (libs.androidx.material.icons.extended)  // Material 3 Icons
 
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.compose) // Navigation
+
+    implementation(libs.accompanist.systemuicontroller) // SystemUiController
+
+
+    implementation(libs.coil.compose) // // Coil for Image Loading
+
+    // Room Database
+    implementation(libs.androidx.room.runtime)
+    kapt(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+
+    implementation(libs.androidx.runtime.livedata) // LiveData
+
+
 
 
 }
