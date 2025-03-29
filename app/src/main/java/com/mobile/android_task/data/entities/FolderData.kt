@@ -12,4 +12,5 @@ data class FolderData(
     val itemCount : Int = 0,
     val createdDate : String = "",
     val folderSize : Long = 0L,
+    val authToken : String = "",
 )

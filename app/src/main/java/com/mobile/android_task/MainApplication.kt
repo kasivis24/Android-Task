@@ -4,7 +4,9 @@ import android.app.Application
 import android.util.Log
 import androidx.room.Room
 import com.mobile.android_task.data.local.AppDatabase
+import dagger.hilt.android.HiltAndroidApp
 
+@HiltAndroidApp
 class MainApplication : Application(){
     companion object{
         lateinit var database: AppDatabase

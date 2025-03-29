@@ -1,10 +1,12 @@
 package com.mobile.android_task.viewmodel
 
+import android.content.Context
 import android.text.BoringLayout
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -46,7 +48,7 @@ class AuthViewModel : ViewModel() {
 
     }
 
-    fun signInWithEmail(email: String, password: String,state : (String) -> Unit,eventState : (Boolean) -> Unit) {
+    fun signInWithEmail(email: String, password: String,state : (String) -> Unit,eventState : (Boolean,String) -> Unit) {
 
         val isVaildEmail : String = validateEmail(email)
         val isVaildPassword : String = validatePassword(password)
@@ -59,9 +61,11 @@ class AuthViewModel : ViewModel() {
                         val stateData : String = if (task.isSuccessful) "Success" else "${task.exception?.message}"
                         state(stateData)
                         if (task.isSuccessful){
-                            eventState(true)
+                            val auth = FirebaseAuth.getInstance()
+                            val userId = auth.currentUser?.uid
+                            eventState(true,userId.toString())
                         }else {
-                            eventState(false)
+                            eventState(false,"error")
                         }
                     }
 
@@ -78,6 +82,22 @@ class AuthViewModel : ViewModel() {
             }
         }
 
+    }
+
+
+
+    fun logout(fileViewModel: FileViewModel,folderViewModel: FolderViewModel){
+        viewModelScope.launch {
+            auth.signOut()
+            deleteDatabaseData(fileViewModel,folderViewModel)
+        }
+    }
+
+    fun deleteDatabaseData(fileViewModel: FileViewModel,folderViewModel: FolderViewModel){
+        viewModelScope.launch {
+            folderViewModel.removeAllFolder()
+            fileViewModel.removeAllFiles()
+        }
     }
 
 

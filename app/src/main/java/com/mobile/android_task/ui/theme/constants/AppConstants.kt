@@ -8,6 +8,7 @@ object AppConstants{
     const val SPLASH_SCREEN_ROUTE = "SPLASH_SCREEN"
     const val MEDIA_SCREEN_ROUTE = "MEDIA_SCREEN"
     const val UPLOAD_SCREEN_ROUTE = "UPLOAD_SCREEN"
+    const val HOME_SCREEN_ROUTE = "HOME_SCREEN"
 }
 
 

@@ -5,9 +5,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.mobile.android_task.data.entities.FileData
 import com.mobile.android_task.data.entities.FolderData
 
-class FolderRepository {
+
+class FileRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
@@ -15,11 +17,12 @@ class FolderRepository {
 
     private val userId = auth.currentUser?.uid
 
-    fun getData(): LiveData<List<FolderData>> {
-        val liveData = MutableLiveData<List<FolderData>>()
+    fun getData(folderid : String): LiveData<List<FileData>> {
+        val liveData = MutableLiveData<List<FileData>>()
 
-        db.collection("folder")
+        db.collection("file")
             .whereEqualTo("authToken",userId)
+            .whereEqualTo("folderId",folderid)
             .addSnapshotListener { snapshot, error ->
                 if (error != null) {
                     liveData.value = emptyList()
@@ -29,7 +32,7 @@ class FolderRepository {
                 if (snapshot != null) {
                     val userList = snapshot.documents.map { document ->
                         Log.d("Log","Snap ${document.data?.get("authToken").toString()}")
-                        document.toObject(FolderData::class.java)!!
+                        document.toObject(FileData::class.java)!!
                     }
                     liveData.value = userList
                 }

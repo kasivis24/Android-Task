@@ -350,7 +350,10 @@ fun SignUpPage(navController: NavController){
                 }
 
 
-                Row (modifier = Modifier.fillMaxWidth(),
+                Row (modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE)
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ){

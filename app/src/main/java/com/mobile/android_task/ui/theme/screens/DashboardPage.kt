@@ -1,6 +1,7 @@
 package com.mobile.android_task.ui.theme.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,6 +36,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -50,8 +53,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -62,6 +67,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
@@ -73,6 +79,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -88,16 +95,21 @@ import com.mobile.android_task.ui.theme.SkyBlue
 import com.mobile.android_task.ui.theme.Yellow
 import com.mobile.android_task.ui.theme.constants.AppConstants
 import com.mobile.android_task.ui.theme.gilroy
+import com.mobile.android_task.viewmodel.AuthViewModel
+import com.mobile.android_task.viewmodel.FileViewModel
 import com.mobile.android_task.viewmodel.FolderViewModel
+import com.mobile.android_task.viewmodel.MediaGalleryViewModel
+import com.mobile.android_task.viewmodel.NetworkViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun DashboardPage(navController: NavController){
+fun DashboardPage(navController: NavController,mediaGalleryViewModel: MediaGalleryViewModel){
 
 
     var showDialogCreateFolder by remember { mutableStateOf(false) }
@@ -112,6 +124,17 @@ fun DashboardPage(navController: NavController){
 
     var isProgress by remember { mutableStateOf(false) }
 
+    val authViewModel = AuthViewModel()
+
+    var expanded by remember { mutableStateOf(false) }
+
+    val options = listOf("Profile", "Logout")
+
+    var selectedOption by remember { mutableStateOf("Select Item") }
+
+    val context = LocalContext.current
+
+    val fileViewModel = FileViewModel()
 
 
 
@@ -279,6 +302,8 @@ fun DashboardPage(navController: NavController){
             Column (modifier = Modifier.fillMaxSize()
             ){
 
+
+
                         Row (
                             modifier = Modifier.fillMaxWidth()
                                 .padding(vertical = 20.dp, horizontal = 15.dp),
@@ -295,15 +320,56 @@ fun DashboardPage(navController: NavController){
                                 ),
                             )
 
-                            Image(
-                                colorFilter = ColorFilter.tint(color = NavyBlue),
-                                modifier = Modifier.size(25.dp),
-                                painter = painterResource(R.drawable.ic_cate),
-                                contentDescription = null,
-                            )
+
+                            Row {
+                                DropdownMenu(
+                                    expanded = expanded,
+                                    onDismissRequest = { expanded = false }
+                                ) {
+                                    options.forEach { option ->
+                                        DropdownMenuItem(
+                                            leadingIcon = {
+                                                Icon(
+                                                    contentDescription = null,
+                                                    painter = if (option.equals("Profile")) painterResource(R.drawable.baseline_supervised_user_circle_24) else painterResource(R.drawable.baseline_logout_24),
+                                                )
+                                            },
+                                            text = { Text(option) },
+                                            onClick = {
+                                                if (option.equals("Logout")) {
+                                                    coroutineScope.launch {
+                                                        authViewModel.logout(fileViewModel,folderViewModel)
+                                                    }
+                                                }
+                                                navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE)
+                                                expanded = false
+                                            }
+                                        )
+                                    }
+                                }
+
+
+
+                                Image(
+                                    colorFilter = ColorFilter.tint(color = NavyBlue),
+                                    modifier = Modifier.size(25.dp)
+                                        .clickable {
+                                            expanded = !expanded
+                                        },
+                                    painter = painterResource(R.drawable.ic_cate),
+                                    contentDescription = null,
+                                )
+                            }
+
+
+
+
+
 
 
                         }
+
+
 
 
                         Box(modifier = Modifier.fillMaxWidth()
@@ -414,17 +480,20 @@ fun DashboardPage(navController: NavController){
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun GridList(navController: NavController) {
+fun GridList(navController: NavController,viewModel: NetworkViewModel = hiltViewModel(),folderViewModel: FolderViewModel = viewModel()) {
 
 
 
     val colors = listOf(Yellow, CardBlue, Green, Red)
 
+    val folderList = folderViewModel.folderLiveData.observeAsState(emptyList())
 
-    val folderList = FolderViewModel().folderLiveData.observeAsState(emptyList())
+    val folderLocalList = folderViewModel.folderLocalLiveData.observeAsState(emptyList())
 
+    val isConnected by viewModel.isConnected
 
-    if (folderList.value.isEmpty()){
+    if (folderList.value.isEmpty() && isConnected){
+        Log.d("Log","Cloud DB Without Intenet No data")
         Box(modifier = Modifier.fillMaxSize()){
             CircularProgressIndicator(
                 modifier = Modifier
@@ -437,7 +506,7 @@ fun GridList(navController: NavController) {
             )
         }
     }
-    if (!folderList.value.isEmpty()){
+    if (!folderList.value.isEmpty() && isConnected){
 
         folderList.let {
 
@@ -454,9 +523,13 @@ fun GridList(navController: NavController) {
 
                     val containerColor = colors[item % colors.size]
 
+                    val folderId = folderList.value.get(item).folderId
+
+                    val folderName = folderList.value.get(item).folderName
+
                     Card(
                         onClick = {
-                            navController.navigate(AppConstants.MEDIA_SCREEN_ROUTE)
+                            navController.navigate("${AppConstants.MEDIA_SCREEN_ROUTE}/$folderId/$folderName")
                         },
                         modifier = Modifier
                             .height(120.dp)
@@ -525,6 +598,114 @@ fun GridList(navController: NavController) {
 
 
 
+    /// Without Network
+
+    if (folderLocalList.value.isEmpty() && !isConnected){
+        Log.d("Log","Local DB Without Intenet No data")
+        Box(modifier = Modifier.fillMaxSize()){
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(70.dp)
+                    .align(Alignment.Center)
+                    .padding(16.dp),
+                strokeWidth = 5.dp,
+                color = SkyBlue,
+                strokeCap = StrokeCap.Round
+            )
+        }
+    }
+    if (!folderLocalList.value.isEmpty() && !isConnected){
+
+        folderLocalList.let {
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 15.dp)
+            ) {
+
+
+
+                items(it.value.size) { item ->
+
+                    val containerColor = colors[item % colors.size]
+
+                    val folderId = folderLocalList.value.get(item).folderId
+
+                    val folderName = folderList.value.get(item).folderName
+
+                    Card(
+                        onClick = {
+                            navController.navigate("${AppConstants.MEDIA_SCREEN_ROUTE}/$folderId/$folderName")
+                        },
+                        modifier = Modifier
+                            .height(120.dp)
+                            .padding(7.dp),
+                        colors = CardDefaults.elevatedCardColors(
+                            disabledContainerColor = containerColor.copy(alpha = 0.2f),
+                            containerColor = containerColor.copy(alpha = 0.2f),
+                        ),
+                    ) {
+
+                        Column (modifier = Modifier.fillMaxSize()
+                            .padding(10.dp)){
+
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                            ){
+
+                                Icon(
+                                    modifier = Modifier.size(30.dp),
+                                    tint = containerColor,
+                                    painter = painterResource(R.drawable.baseline_folder_24),
+                                    contentDescription = null,
+                                )
+
+                                Icon(
+                                    modifier = Modifier.size(20.dp),
+                                    tint = containerColor,
+                                    painter = painterResource(R.drawable.ic_menu),
+                                    contentDescription = null,
+                                )
+
+
+                            }
+
+
+                            Text(
+                                "${folderLocalList.value.get(item).folderName}",
+                                modifier = Modifier.padding(vertical = 10.dp),
+                                style = TextStyle(
+                                    color = containerColor,
+                                    fontFamily = gilroy,
+                                    fontSize = 17.sp,
+                                    fontWeight = FontWeight.W900,
+                                )
+                            )
+
+                            Text(
+                                "${folderLocalList.value.get(item).createdDate}",
+                                style = TextStyle(
+                                    color = containerColor,
+                                    fontFamily = gilroy,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.W500,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
+
+        }
+
+    }
+
+
+
 
 
 }
@@ -537,8 +718,9 @@ fun GridList(navController: NavController) {
 fun DashBoardPreview(){
 
     val navController = rememberNavController()
+    val mediaGalleryViewModel = MediaGalleryViewModel()
     AndroidTaskTheme {
-        DashboardPage(navController)
+        DashboardPage(navController, mediaGalleryViewModel = mediaGalleryViewModel)
     }
 }
 

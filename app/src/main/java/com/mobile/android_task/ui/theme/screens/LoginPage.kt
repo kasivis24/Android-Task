@@ -52,14 +52,18 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.mobile.android_task.Greeting
 import com.mobile.android_task.R
+import com.mobile.android_task.data.entities.FolderData
 import com.mobile.android_task.ui.theme.AndroidTaskTheme
 import com.mobile.android_task.ui.theme.Blue
 import com.mobile.android_task.ui.theme.Orange
 import com.mobile.android_task.ui.theme.constants.AppConstants
 import com.mobile.android_task.ui.theme.gilroy
 import com.mobile.android_task.viewmodel.AuthViewModel
+import com.mobile.android_task.viewmodel.FolderViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @Composable
@@ -80,6 +84,13 @@ fun LoginPage(navController: NavController){
 
     var isProgress by remember { mutableStateOf(false) }
 
+    val auth = FirebaseAuth.getInstance()
+
+    val folderViewModel = FolderViewModel()
+
+    var dataList by remember { mutableStateOf(emptyList<FolderData>()) }
+
+    val uId = auth.currentUser?.uid
 
 
 
@@ -105,7 +116,7 @@ fun LoginPage(navController: NavController){
                     Icon(
                         painter = painterResource(R.drawable.baseline_arrow_back_ios_24),
                         contentDescription = null,
-                        )
+                    )
                 }
 
                 Spacer(modifier = Modifier.width(10.dp))
@@ -309,9 +320,16 @@ fun LoginPage(navController: NavController){
                                             isProgress = !isProgress
                                         }
                                     },
-                                    eventState = {
+                                    eventState = { isState, uId->
+                                        Log.d("Log","Event Success ${isState}")
                                         coroutineScope.launch {
-                                            if (it){
+                                            if (isState){
+                                                Log.d("Log","coroutine ${uId}")
+                                                coroutineScope.launch {
+                                                    dataList = folderViewModel.fetchDataFromFirestore(uId)
+                                                    folderViewModel.resetDb(dataList)
+                                                    Log.d("Log","Datalist ${dataList}")
+                                                }
                                                 navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE)
                                             }
                                         }
@@ -344,7 +362,10 @@ fun LoginPage(navController: NavController){
                 }
 
 
-                Row (modifier = Modifier.fillMaxWidth(),
+                Row (modifier = Modifier.fillMaxWidth()
+                    .clickable {
+                        navController.navigate(AppConstants.SIGNUP_SCREEN_ROUTE)
+                    },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ){
