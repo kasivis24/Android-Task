@@ -55,6 +55,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.mobile.android_task.Greeting
 import com.mobile.android_task.R
+import com.mobile.android_task.data.entities.FileData
 import com.mobile.android_task.data.entities.FolderData
 import com.mobile.android_task.ui.theme.AndroidTaskTheme
 import com.mobile.android_task.ui.theme.Blue
@@ -62,6 +63,7 @@ import com.mobile.android_task.ui.theme.Orange
 import com.mobile.android_task.ui.theme.constants.AppConstants
 import com.mobile.android_task.ui.theme.gilroy
 import com.mobile.android_task.viewmodel.AuthViewModel
+import com.mobile.android_task.viewmodel.FileViewModel
 import com.mobile.android_task.viewmodel.FolderViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -87,8 +89,11 @@ fun LoginPage(navController: NavController){
     val auth = FirebaseAuth.getInstance()
 
     val folderViewModel = FolderViewModel()
+    val fileViewModel = FileViewModel()
 
-    var dataList by remember { mutableStateOf(emptyList<FolderData>()) }
+    var dataListFolder by remember { mutableStateOf(emptyList<FolderData>()) }
+
+    var dataListFile by remember { mutableStateOf(emptyList<FileData>()) }
 
     val uId = auth.currentUser?.uid
 
@@ -322,17 +327,28 @@ fun LoginPage(navController: NavController){
                                     },
                                     eventState = { isState, uId->
                                         Log.d("Log","Event Success ${isState}")
+
+
+
+
                                         coroutineScope.launch {
                                             if (isState){
                                                 Log.d("Log","coroutine ${uId}")
                                                 coroutineScope.launch {
-                                                    dataList = folderViewModel.fetchDataFromFirestore(uId)
-                                                    folderViewModel.resetDb(dataList)
-                                                    Log.d("Log","Datalist ${dataList}")
+                                                    dataListFolder = folderViewModel.fetchDataFromFirestore(uId)
+                                                    folderViewModel.resetDbFolder(dataListFolder)
+                                                    Log.d("Log","DatalistFolder ${dataListFolder}")
+                                                }
+                                                coroutineScope.launch {
+                                                    dataListFile = fileViewModel.fetchDataFromFireStoreFile(uId)
+                                                    fileViewModel.resetDbFile(dataListFile)
+                                                    Log.d("Log","DatalistFile ${dataListFolder}")
                                                 }
                                                 navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE)
                                             }
                                         }
+
+
                                     }
                                     )
                             }

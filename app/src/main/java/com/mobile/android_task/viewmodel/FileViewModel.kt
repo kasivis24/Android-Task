@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -22,6 +23,7 @@ import com.mobile.android_task.data.repository.FileRepository
 import com.mobile.android_task.data.repository.FolderRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -55,6 +57,43 @@ class FileViewModel : ViewModel() {
     init {
         Log.d("Test-Android","Init File MVVM")
     }
+
+
+    fun resetDbFile(dataList : List<FileData>){
+        dataList.forEach { fileData ->
+            viewModelScope.launch(Dispatchers.IO){
+                Log.d("Log","added ${fileData}")
+                database.addFile(fileData)
+            }
+        }
+    }
+
+
+    /// for Reset the DB
+    suspend fun fetchDataFromFireStoreFile(uId: String) : SnapshotStateList<FileData> {
+
+        val firestore = FirebaseFirestore.getInstance()
+        val dataList = mutableStateListOf<FileData>()
+
+        try {
+            Log.d("Log","uuid ${uId}")
+            val querySnapshot = firestore.collection("file").whereEqualTo("authToken",uId).get().await() // Use await()
+
+            for (document in querySnapshot.documents) {
+                val myData = FileData(document.get("id").toString().toInt(),document.getString("folderId").toString(),document.getString("fileName").toString(),document.get("createdDate").toString(),document.getString("fileSize").toString(), document.getString("fileUrl").toString(),document.getString("fileType").toString(),document.getString("authToken").toString(),document.getString("fileId").toString())
+                dataList.add(myData)
+            }
+
+            Log.d("Log","from ${dataList}")
+
+        } catch (e: Exception) {
+            // Handle errors appropriately (e.g., log, show error message)
+            println("Error fetching data: ${e.message}")
+        }
+
+        return dataList
+    }
+
 
 
     fun getFileDataCloud(folderId: String){

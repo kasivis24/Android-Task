@@ -21,3 +21,12 @@ val Red = Color(0xffF45656)
 val Green = Color(0xff34DEDE)
 val NavyBlue = Color(0xff22215B)
 val SkyBlue = Color(0xff18ACFF)
+
+
+
+val headerLight = Color(0xff22215B)
+val iconLight = Color(0xFF646363)
+
+
+val headerDark = Color(0xffffffff)
+val iconDark = Color(0xffffffff)

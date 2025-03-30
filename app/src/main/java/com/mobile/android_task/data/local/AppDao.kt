@@ -2,6 +2,8 @@ package com.mobile.android_task.data.local
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.mobile.android_task.data.entities.FileData
+import com.mobile.android_task.data.entities.FileSizeData
+import com.mobile.android_task.data.entities.PieChartData
 import com.mobile.android_task.data.entities.FolderData
 
 @Dao
@@ -35,9 +37,16 @@ interface AppDao{
     @Query("DELETE FROM file where folderId = :folderId")
     suspend fun removeFilesById(folderId : String)
 
+    // remove folder by Id
+    @Query("DELETE FROM folder where folderId = :folderId")
+    suspend fun removeFolderById(folderId : String)
+
     // remove SingleFile
     @Query("DELETE FROM file where folderId = :folderId AND fileId = :fileId")
     suspend fun removeSingleFilesById(folderId : String,fileId : String)
+
+    @Query("SELECT fileType, SUM(fileSize) as totalSize FROM file GROUP BY fileType")
+    suspend fun getFileSizesByType(): List<FileSizeData>
 
 
 }

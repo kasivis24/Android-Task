@@ -1,8 +1,6 @@
 package com.mobile.android_task.viewmodel
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +9,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.mobile.android_task.MainApplication
 import com.mobile.android_task.data.entities.FileData
-import com.mobile.android_task.data.entities.FolderData
+import com.mobile.android_task.data.entities.PieChartData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -36,8 +34,39 @@ class MediaGalleryViewModel : ViewModel() {
     private val _isSingleFile = MutableLiveData(false)
     val isSingleFile: LiveData<Boolean> = _isSingleFile
 
+    private val _infoFileData = MutableLiveData(FileData())
+    val infoFileData: LiveData<FileData> = _infoFileData
 
+    private val _pieChartData = MutableLiveData<List<PieChartData>>()
+    val pieChartData: LiveData<List<PieChartData>>  = _pieChartData
 
+    init {
+        loadPieChartData()
+    }
+
+    fun loadPieChartData() {
+        viewModelScope.launch {
+            val fileSizes = database.getFileSizesByType()
+            val pieData = fileSizes.map { data ->
+                PieChartData(
+                    name = when {
+                        data.fileType.startsWith("image/") -> "Image"
+                        data.fileType.startsWith("audio/") -> "Audio"
+                        data.fileType.startsWith("video/") -> "Video"
+                        else -> "Other"
+                    },
+                    value = data.totalSize
+                )
+            }
+            _pieChartData.postValue(pieData)
+        }
+    }
+
+    fun infoFileData(fileData: FileData) {
+        viewModelScope.launch {
+            _infoFileData.value = fileData
+        }
+    }
 
 
     fun copyFolder(folderId : String,onSuccess: () -> Unit){
@@ -200,6 +229,10 @@ class MediaGalleryViewModel : ViewModel() {
                 }
         }
     }
+
+
+
+
 
 
 }

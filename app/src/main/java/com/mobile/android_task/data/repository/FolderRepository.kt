@@ -28,7 +28,7 @@ class FolderRepository {
 
                 if (snapshot != null) {
                     val userList = snapshot.documents.map { document ->
-                        Log.d("Log","Snap ${document.data?.get("authToken").toString()}")
+                        Log.d("Log","Snap folder ${document.data?.get("authToken").toString()}")
                         document.toObject(FolderData::class.java)!!
                     }
                     liveData.value = userList

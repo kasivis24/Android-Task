@@ -1,5 +1,4 @@
-package com.mobile.apicalljetcompose.ui.theme.screens
-
+package com.mobile.android_task.ui.theme.screens
 import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
@@ -62,7 +61,7 @@ fun SplashScreen(navController: NavController) {
                 .align(Alignment.Center)
         )
 
-        Text(modifier = Modifier.align(Alignment.BottomCenter), text = "ZoundBox", fontSize = 20.sp, fontFamily = gilroy,fontWeight = FontWeight.W500, color = Color.Gray.copy(alpha = 0.3f))
+        Text(modifier = Modifier.align(Alignment.BottomCenter), text = "Zpace", fontSize = 20.sp, fontFamily = gilroy,fontWeight = FontWeight.W500, color = Color.Gray.copy(alpha = 0.3f))
 
 
     }

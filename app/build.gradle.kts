@@ -74,6 +74,11 @@ dependencies {
 
     implementation(libs.coil.compose) // // Coil for Image Loading
 
+
+    implementation("androidx.media3:media3-exoplayer:1.2.0")
+    implementation("androidx.media3:media3-ui:1.2.0")
+
+
     // Room Database
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
@@ -85,6 +90,13 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
 
     implementation(libs.androidx.runtime.livedata) // LiveData
+
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.36.0") // status bar
+
+    implementation("androidx.datastore:datastore-preferences:1.0.0") // shared preferance
+
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0") // PieChart
+
 
 
 
