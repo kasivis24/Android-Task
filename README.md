@@ -43,7 +43,11 @@ This is a media storage app that allows users to store, manage, and retrieve fil
 ## Installation
 1. Clone the repository:
    ```sh
-   git clone https://github.com/your-repo/media-storage-app.git
+   git clone [https://github.com/kasivis24/Android-Task]
+   ```
+2. Apk for Download:
+   ```sh
+   git clone []
    ```
 2. Open the project in your preferred IDE (Android Studio/VS Code).
 3. Add your Firebase configuration file (`google-services.json`).
