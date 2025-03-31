@@ -1,4 +1,4 @@
-# Media Storage App (Offline & Online)
+# Media Storage App (Offline & Online) (Zpace)
 
 ## Overview
 This is a media storage app that allows users to store, manage, and retrieve files both online and offline. It integrates Firebase for authentication and cloud storage, while also offering local storage support. The app includes features like folder creation, file upload/download, theme switching, and advanced search options.
@@ -47,11 +47,23 @@ This is a media storage app that allows users to store, manage, and retrieve fil
    ```
 2. Apk for Download:
    ```sh
-   git clone []
+   git clone [https://github.com/kasivis24/Android-Task/blob/master/app-debug.apk]
    ```
 2. Open the project in your preferred IDE (Android Studio/VS Code).
 3. Add your Firebase configuration file (`google-services.json`).
 4. Run the app on an emulator or physical device.
+
+## ScreenShots
+![IMG-20250331-WA0011](https://github.com/user-attachments/assets/5a050ebb-b96b-4dd9-99a9-4dfee6c1b92a)
+![IMG-20250331-WA0009](https://github.com/user-attachments/assets/9b009045-17fb-47ac-bd49-6d2b005d9085)
+![IMG-20250331-WA0010](https://github.com/user-attachments/assets/f89733fb-442d-4e30-93ce-227a1f40fade)
+![IMG-20250331-WA0006](https://github.com/user-attachments/assets/29d679eb-c476-4cca-9a22-1e1edfac305b)
+![IMG-20250331-WA0007](https://github.com/user-attachments/assets/943176fb-9baa-4a4b-8c10-b46816cf785c)
+![IMG-20250331-WA0008](https://github.com/user-attachments/assets/2ee31784-3233-4bc8-ab95-e28acdebebca)
+![IMG-20250331-WA0004](https://github.com/user-attachments/assets/67eed738-3838-4c11-bfb0-e8a3acc273ef)
+![IMG-20250331-WA0005](https://github.com/user-attachments/assets/a543fa68-1feb-42fb-9a22-9cb9674c06a7)
+
+
 
 ## Future Enhancements
 - Add offline storage sync for better user experience.
