@@ -3,11 +3,13 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -55,6 +57,7 @@ fun SplashScreen(navController: NavController) {
         modifier = Modifier.fillMaxSize(),
     ) {
         Image(
+//            colorFilter = ColorFilter.tint(color = MaterialTheme.colorScheme.inverseSurface),
             painter = painterResource(id = R.drawable.app_logo), // Replace with your logo
             contentDescription = "Splash Logo",
             modifier = Modifier.size(200.dp)

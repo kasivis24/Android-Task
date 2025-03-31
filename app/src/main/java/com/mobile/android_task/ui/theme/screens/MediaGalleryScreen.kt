@@ -568,10 +568,10 @@ fun MediaGalleryScreen(navController: NavController, folderId : String, folderNa
                 Column (modifier = Modifier.clickable {
                     if (isConnected){
                         showCopyDialog = !showCopyDialog
-                    }else{
+                    }
+                    else{
                         Toast.makeText(context,"No Internet !! Oops !!!",Toast.LENGTH_SHORT).show()
                     }
-
                 },verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ){
@@ -841,7 +841,8 @@ fun MediaItemFile(fileData: FileData,folderId: String,snackbarHostState: Snackba
                                         onInfo()
                                     }
                                 }
-                                else{
+
+                                if(!isConnected){
                                     Toast.makeText(context,"No Internet !! Oops !!!",Toast.LENGTH_SHORT).show()
                                 }
                                 expanded = false

@@ -26,7 +26,9 @@ val SkyBlue = Color(0xff18ACFF)
 
 val headerLight = Color(0xff22215B)
 val iconLight = Color(0xFF646363)
+val applogoLight = Color(0xffffffff)
 
 
 val headerDark = Color(0xffffffff)
 val iconDark = Color(0xffffffff)
+val applogoDark = Color(0xff000000)

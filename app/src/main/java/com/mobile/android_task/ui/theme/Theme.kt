@@ -17,6 +17,7 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = Pink80,
     primaryContainer = headerDark,
     inverseOnSurface = iconDark,
+    inverseSurface = applogoDark,
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -25,6 +26,7 @@ private val LightColorScheme = lightColorScheme(
     tertiary = Pink40,
     primaryContainer = headerLight,
     inverseOnSurface = iconLight,
+    inverseSurface = applogoLight,
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
     surface = Color(0xFFFFFBFE),

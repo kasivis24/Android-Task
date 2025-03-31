@@ -215,7 +215,7 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                                 Toast.makeText(context,"No Internet!! Oops !!!",Toast.LENGTH_SHORT).show()
                             }
                             showLogoutDialog = !showLogoutDialog
-                        }, text = "Delete",  fontFamily = gilroy)
+                        }, text = "Logout",  fontFamily = gilroy)
                     },
                     dismissButton = {
                         Text(modifier = Modifier.
@@ -437,7 +437,7 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                         ){
 
                             Text(
-                                "Your dribbbox",
+                                "Your Zpace",
                                 style = TextStyle(
                                     fontSize = 25.sp,
                                     fontFamily = gilroy,
@@ -484,10 +484,6 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                                                         showBottomSheetPieChart = !showBottomSheetPieChart
                                                         expanded = false
                                                     }
-                                                }
-
-                                                else{
-                                                    Toast.makeText(context,"No Internet!! Oops !!!",Toast.LENGTH_SHORT).show()
                                                 }
 
 
