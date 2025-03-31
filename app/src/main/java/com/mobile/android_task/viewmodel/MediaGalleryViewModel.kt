@@ -13,6 +13,7 @@ import com.mobile.android_task.data.entities.PieChartData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 
 class MediaGalleryViewModel : ViewModel() {
 
@@ -21,9 +22,6 @@ class MediaGalleryViewModel : ViewModel() {
 
     val fireStoreDB = FirebaseFirestore.getInstance()
 
-    val auth = FirebaseAuth.getInstance()
-
-    val authToken = auth.currentUser?.uid
 
     private val _text = MutableLiveData("")
     val text: LiveData<String> = _text
@@ -38,7 +36,7 @@ class MediaGalleryViewModel : ViewModel() {
     val infoFileData: LiveData<FileData> = _infoFileData
 
     private val _pieChartData = MutableLiveData<List<PieChartData>>()
-    val pieChartData: LiveData<List<PieChartData>>  = _pieChartData
+    val pieChartData: LiveData<List<PieChartData>> = _pieChartData
 
     init {
         loadPieChartData()
@@ -64,44 +62,49 @@ class MediaGalleryViewModel : ViewModel() {
 
     fun infoFileData(fileData: FileData) {
         viewModelScope.launch {
-            _infoFileData.value = fileData
+            _infoFileData.postValue(fileData)
         }
     }
 
 
-    fun copyFolder(folderId : String,onSuccess: () -> Unit){
+    fun copyFolder(folderId: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            _text.value = folderId
-            _isSingleFile.value = false
+            _text.postValue(folderId)
+            _isSingleFile.postValue(false)
             onSuccess()
         }
     }
 
-    fun copySingleFile(folderId: String,fileId : String,onSuccess: () -> Unit){
+    fun copySingleFile(folderId: String, fileId: String, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            _text.value = folderId
-            _fileId.value = fileId
-            _isSingleFile.value = true
+            _text.postValue(folderId)
+            _fileId.postValue(fileId)
+            _isSingleFile.postValue(true)
             onSuccess()
         }
     }
 
 
-    fun deleteSingleFile(folderId: String,fileId: String,onSuccess: () -> Unit,onFailure: () -> Unit){
+    fun deleteSingleFile(
+        folderId: String,
+        fileId: String,
+        onSuccess: () -> Unit,
+        onFailure: () -> Unit
+    ) {
         viewModelScope.launch {
-            viewModelScope.launch {
+            viewModelScope.launch(Dispatchers.IO) {
 
                 fireStoreDB.collection("file")
                     .whereEqualTo("folderId", folderId)
-                    .whereEqualTo("fileId",fileId)
+                    .whereEqualTo("fileId", fileId)
                     .get()
                     .addOnSuccessListener { documents ->
                         for (document in documents) {
                             fireStoreDB.collection("file").document(document.id)
                                 .delete()
                                 .addOnSuccessListener {
-                                    viewModelScope.launch(Dispatchers.IO){
-                                        database.removeSingleFilesById(folderId,fileId)
+                                    viewModelScope.launch(Dispatchers.IO) {
+                                        database.removeSingleFilesById(folderId, fileId)
                                     }
                                     Log.d("Log", "Document ${document.id} successfully deleted!")
                                 }
@@ -119,90 +122,150 @@ class MediaGalleryViewModel : ViewModel() {
         }
     }
 
-    fun pasteFolder(folderId: String,isSuccess: ()-> Unit,isFailure: ()-> Unit){
+    suspend fun pasteFolder(
+        authToken: String,
+        folderId: String,
+        isSuccess: () -> Unit,
+        isFailure: () -> Unit,
+        error: (String) -> Unit,
+    ) {
 
-        if (!folderId.isEmpty() && text.value?.isNotEmpty() == true && isSingleFile.value == false){
-            Log.d("Log","Paste Scope folderId ${folderId}")
 
-            viewModelScope.launch {
+        Log.e("Log", "FileId ${fileId.value} siSingleFile ${isSingleFile.value}")
 
-                try {
-                    Log.d("Log","uuid ${authToken}  && ${text.value}")
-                    val querySnapshot = fireStoreDB.collection("file").whereEqualTo("authToken",authToken).whereEqualTo("folderId",text.value).get().await() // Use await()
+        Log.d("Log","paste")
 
-                    for (document in querySnapshot.documents) {
-                        val docRef = fireStoreDB.collection("file").document()  // generates new doc ref with ID
-                        val docId = docRef.id
-                        val myData = FileData(document.get("id").toString().toInt(),folderId,document.getString("fileName").toString(),document.getString("createdDate").toString(),document.getString("fileSize").toString(), document.getString("fileUrl").toString(),document.getString("fileType").toString(),document.getString("authToken").toString(),document.getString("fileId").toString())
-                        Log.d("Log","mydata ${myData}")
-                        docRef.set(myData)
-                            .addOnSuccessListener {
-                                viewModelScope.launch(Dispatchers.IO){
-                                    Log.d("Log", "File added with ID: $docId")
-                                    database.addFile(myData)
+        if (!folderId.isEmpty() && text.value?.isNotEmpty() == true && !isSingleFile.value!!) {
+            Log.d("Log", "Paste Scope folderId $folderId")
+
+            try {
+                val querySnapshot = fireStoreDB.collection("file")
+                    .whereEqualTo("authToken", authToken)
+                    .whereEqualTo("folderId", text.value)
+                    .get()
+                    .await()
+
+                for (document in querySnapshot.documents) {
+                    val docRef = fireStoreDB.collection("file").document()
+                    val docId = docRef.id
+                    val myData = FileData(
+                        document.get("id")?.toString()?.toIntOrNull() ?: 0,
+                        folderId,
+                        document.getString("fileName").orEmpty(),
+                        document.getString("createdDate").orEmpty(),
+                        document.getString("fileSize").orEmpty(),
+                        document.getString("fileUrl").orEmpty(),
+                        document.getString("fileType").orEmpty(),
+                        document.getString("authToken").orEmpty(),
+                        document.getString("fileId").orEmpty()
+                    )
+                    Log.d("Log", "mydata $myData")
+
+                    docRef.set(myData)
+                        .addOnSuccessListener {
+                            Log.d("Log", "File added with ID: $docId")
+                            viewModelScope.launch(Dispatchers.IO) {
+                                database.addFile(myData)
+                                withContext(Dispatchers.Main) {
                                     isSuccess()
                                 }
                             }
-                            .addOnFailureListener { exception ->
-                                Log.d("Log", "Failed to add: $exception")
-                                isFailure()
-                            }
-                    }
-
-
-
-                } catch (e: Exception) {
-                    // Handle errors appropriately (e.g., log, show error message)
-                    println("Error fetching data: ${e.message}")
+                        }
+                        .addOnFailureListener { exception ->
+                            Log.e("Log", "Failed to add: $exception")
+                            isFailure()
+                        }
                 }
-
-
+            } catch (e: Exception) {
+                Log.e("Error", "Exception in Firestore: ${e.message}")
+                error(e.message ?: "Unknown error")
             }
         }
+        else if (!folderId.isEmpty() && text.value?.isNotEmpty() == true && isSingleFile.value!! && fileId.value?.isNotEmpty() == true) {
+            Log.d("Log", "Paste Scope Single fileId ${fileId.value} authToken ${authToken}")
 
-        if (!folderId.isEmpty() && text.value?.isNotEmpty() == true && isSingleFile.value == true && fileId.value?.isNotEmpty() == true){
-            Log.d("Log","Paste Scope fileId ${fileId}")
+            try {
 
-            viewModelScope.launch {
+                fireStoreDB.collection("file")
+                    .whereEqualTo("authToken", authToken)
+                    .whereEqualTo("folderId", text.value)
+                    .whereEqualTo("fileId", fileId.value)
+                    .get()
+                    .addOnSuccessListener {
+                        Log.d("Log"," documnet $authToken")
 
-                try {
-                    Log.d("Log","uuid ${authToken}  && ${text.value}")
-                    val querySnapshot = fireStoreDB.collection("file").whereEqualTo("authToken",authToken).whereEqualTo("folderId",text.value).whereEqualTo("fileId",fileId.value).get().await() // Use await()
+                        for (document in it.documents) {
 
-                    for (document in querySnapshot.documents) {
-                        val docRef = fireStoreDB.collection("file").document()  // generates new doc ref with ID
-                        val docId = docRef.id
-                        val myData = FileData(document.get("id").toString().toInt(),folderId,document.getString("fileName").toString(),document.getString("createdDate").toString(),document.getString("fileSize").toString(), document.getString("fileUrl").toString(),document.getString("fileType").toString(),document.getString("authToken").toString(),document.getString("fileId").toString())
-                        Log.d("Log","mydata ${myData}")
-                        docRef.set(myData)
-                            .addOnSuccessListener {
-                                viewModelScope.launch(Dispatchers.IO){
+                            Log.d("Log"," documnet $document")
+
+                            val docRef = fireStoreDB.collection("file").document()
+                            val docId = docRef.id
+                            val myData = FileData(
+                                document.get("id")?.toString()?.toIntOrNull() ?: 0,
+                                folderId,
+                                document.getString("fileName").orEmpty(),
+                                document.getString("createdDate").orEmpty(),
+                                document.getString("fileSize").orEmpty(),
+                                document.getString("fileUrl").orEmpty(),
+                                document.getString("fileType").orEmpty(),
+                                document.getString("authToken").orEmpty(),
+                                document.getString("fileId").orEmpty()
+                            )
+                            Log.d("Log", "mydata $myData")
+
+                            docRef.set(myData)
+                                .addOnSuccessListener {
                                     Log.d("Log", "File added with ID: $docId")
-                                    database.addFile(myData)
-                                    isSuccess()
+                                    viewModelScope.launch(Dispatchers.IO) {
+                                        database.addFile(myData)
+                                        withContext(Dispatchers.Main) {
+                                            isSuccess()
+                                        }
+                                    }
                                 }
-                            }
-                            .addOnFailureListener { exception ->
-                                Log.d("Log", "Failed to add: $exception")
-                                isFailure()
-                            }
+                                .addOnFailureListener { exception ->
+                                    Log.e("Log", "Failed to add: $exception")
+                                    isFailure()
+                                }
+                        }
                     }
 
+//                withContext(Dispatchers.Main) {
+//                    error("error found after try auth token ${querySnapshot.documents}")
+//                }
+//                withContext(Dispatchers.Main) {
+//                    error("error found after try text folder ${text.value}")
+//                }
+//                withContext(Dispatchers.Main) {
+//                    error("error found after try file id ${fileId}")
+//                }
+//                withContext(Dispatchers.Main) {
+//                    error("error found after try folder d ${folderId}")
+//                }
+//
+//                withContext(Dispatchers.Main) {
+//                    error("error found after await")
+//                }
+//
+//                withContext(Dispatchers.Main) {
+//                    error("error found after await ${querySnapshot.documents}")
+//                }
 
 
-                } catch (e: Exception) {
-                    // Handle errors appropriately (e.g., log, show error message)
-                    println("Error fetching data: ${e.message}")
-                }
-
-
+            } catch (e: Exception) {
+                Log.e("Error", "Exception in Firestore: ${e.message}")
+                error(e.message ?: "Unknown error")
             }
+        } else {
+            error("Invalid data or empty fields")
         }
     }
 
 
+
+
     fun deleteAllFilesFromFolder(folderId: String,onSuccess: () -> Unit,onFailure: ()-> Unit){
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO){
 
             fireStoreDB.collection("file")
                 .whereEqualTo("folderId", folderId)

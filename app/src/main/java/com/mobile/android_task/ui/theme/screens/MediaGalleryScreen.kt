@@ -1,5 +1,6 @@
 package com.mobile.android_task.ui.theme.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -65,6 +66,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.google.firebase.auth.FirebaseAuth
 import com.mobile.android_task.AndroidDownloader
 import com.mobile.android_task.R
 import com.mobile.android_task.data.entities.FileData
@@ -79,6 +81,7 @@ import com.mobile.android_task.utils.RequestStoragePermission
 import com.mobile.android_task.viewmodel.FileViewModel
 import com.mobile.android_task.viewmodel.MediaGalleryViewModel
 import com.mobile.android_task.viewmodel.NetworkViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -117,6 +120,8 @@ fun MediaGalleryScreen(navController: NavController, folderId : String, folderNa
     var showPasteDialog by remember { mutableStateOf(false) }
 
     var showCopyDialog by remember { mutableStateOf(false) }
+
+    val auth = FirebaseAuth.getInstance()
 
 
     LaunchedEffect (Unit){
@@ -163,20 +168,30 @@ fun MediaGalleryScreen(navController: NavController, folderId : String, folderNa
                 confirmButton = {
                     Text(modifier = Modifier.
                     clickable {
-                        coroutineScope.launch {
-                            mediaGalleryViewModel.pasteFolder(
-                                folderId,
-                                isSuccess = {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("File are Transferred")
-                                    }
-                                },
-                                isFailure = {
-                                    coroutineScope.launch {
-                                        snackbarHostState.showSnackbar("File are Transferred Failed")
-                                    }
-                                }
-                            )
+                        val authToken = auth.currentUser?.uid
+                        try {
+                            coroutineScope.launch(Dispatchers.IO){
+                                mediaGalleryViewModel.pasteFolder(
+                                    authToken.toString(),
+                                    folderId,
+                                    isSuccess = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("File are Transferred")
+                                        }
+                                    },
+                                    isFailure = {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar("File are Transferred Failed")
+                                        }
+                                    },
+                                    error = {
+                                        Toast.makeText(context,"${it}",Toast.LENGTH_SHORT).show()
+                                    },
+                                )
+                            }
+                        }
+                        catch (e:Exception){
+                            Toast.makeText(context,"Excep ${e}",Toast.LENGTH_SHORT).show()
                         }
                         showPasteDialog = !showPasteDialog
                     }, text = "Paste",  fontFamily = gilroy)
