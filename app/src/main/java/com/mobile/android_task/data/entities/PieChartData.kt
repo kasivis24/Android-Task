@@ -6,8 +6,5 @@ data class PieChartData(
     var value: Float?
 )
 
-data class FileSizeData(
-    val fileType: String,
-    val totalSize: Float
-)
+
 

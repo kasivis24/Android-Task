@@ -28,7 +28,6 @@ class FileRepository {
                     liveData.value = emptyList()
                     return@addSnapshotListener
                 }
-
                 if (snapshot != null) {
                     val userList = snapshot.documents.map { document ->
                         Log.d("Log","Snap ${document.data?.get("authToken").toString()}")

@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -167,8 +168,14 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
 
     val fileViewModel = FileViewModel()
 
+    var exitDialog by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
 
+
+    BackHandler {
+        exitDialog = true
+    }
 
 
     Scaffold (modifier = Modifier.fillMaxSize(),
@@ -196,6 +203,44 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
         ){
 
 
+            if (exitDialog){
+                AlertDialog(
+                    onDismissRequest = { /* Prevent dismissal */ },
+                    title = {
+                        Text(
+                            text = "Are you sure exit the app ?",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.W600,
+                            fontFamily = gilroy
+                        )
+                    },
+                    text = {
+                    },
+                    dismissButton = {
+                        Text(
+                            modifier = Modifier.clickable {
+                                navController.popBackStack()
+                                exitDialog = !exitDialog
+                            },
+                            text = "yes",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.W400,
+                            fontFamily = gilroy
+                        )
+                    },
+                    confirmButton = {
+                        Text(
+                            modifier = Modifier.clickable {
+                                exitDialog = !exitDialog
+                            },
+                            text = "no",
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.W400,
+                            fontFamily = gilroy
+                        )
+                    }
+                )
+            }
 
             if (showLogoutDialog && isConnected){
                 AlertDialog(
@@ -209,7 +254,11 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                             if (isConnected){
                                 coroutineScope.launch {
                                     authViewModel.logout(fileViewModel,folderViewModel)
-                                    navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE)
+                                    navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE){
+                                        popUpTo(AppConstants.DASHBOARD_SCREEN_ROUTE) {
+                                            inclusive = true
+                                        }
+                                    }
                                 }
                             }else{
                                 Toast.makeText(context,"No Internet!! Oops !!!",Toast.LENGTH_SHORT).show()
@@ -388,7 +437,7 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                                             }
                                         }
                                     }
-                                    .background(color = SkyBlue, shape = RoundedCornerShape(15.dp))
+                                    .background(color = Blue, shape = RoundedCornerShape(15.dp))
                                     .height(45.dp),
                                     contentAlignment = Alignment.Center,
                                 ){

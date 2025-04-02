@@ -316,7 +316,9 @@ fun SignUpPage(navController: NavController){
                                     },
                                     eventState = {
                                         if (it) {
-                                            navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE)
+                                            navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE){
+                                                popUpTo(AppConstants.SIGNUP_SCREEN_ROUTE) { inclusive = true }
+                                            }
                                         }
                                     },
                                     )
@@ -352,7 +354,11 @@ fun SignUpPage(navController: NavController){
 
                 Row (modifier = Modifier.fillMaxWidth()
                     .clickable {
-                        navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE)
+                        navController.navigate(AppConstants.LOGIN_SCREEN_ROUTE){
+                            popUpTo(AppConstants.SIGNUP_SCREEN_ROUTE) {
+                                inclusive = true
+                            }
+                        }
                     },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,

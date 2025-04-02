@@ -11,7 +11,6 @@ class MainApplication : Application(){
     companion object{
         lateinit var database: AppDatabase
     }
-
     override fun onCreate() {
         super.onCreate()
 

@@ -344,7 +344,9 @@ fun LoginPage(navController: NavController){
                                                     fileViewModel.resetDbFile(dataListFile)
                                                     Log.d("Log","DatalistFile ${dataListFolder}")
                                                 }
-                                                navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE)
+                                                navController.navigate(AppConstants.DASHBOARD_SCREEN_ROUTE){
+                                                    popUpTo(AppConstants.LOGIN_SCREEN_ROUTE){ inclusive = true}
+                                                }
                                             }
                                         }
 
@@ -380,7 +382,11 @@ fun LoginPage(navController: NavController){
 
                 Row (modifier = Modifier.fillMaxWidth()
                     .clickable {
-                        navController.navigate(AppConstants.SIGNUP_SCREEN_ROUTE)
+                        navController.navigate(AppConstants.SIGNUP_SCREEN_ROUTE){
+                            popUpTo(AppConstants.LOGIN_SCREEN_ROUTE) {
+                                inclusive = true
+                            }
+                        }
                     },
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
