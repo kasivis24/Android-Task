@@ -2,6 +2,7 @@ package com.mobile.android_task.ui.theme.screens
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Build
@@ -129,7 +130,7 @@ import com.mobile.android_task.ui.theme.screens.PieChart as PieChart
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "ContextCastToActivity")
 @Composable
 fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: () -> Unit,themePreferenceManager: ThemePreferenceManager,mediaGalleryViewModel: MediaGalleryViewModel,viewModel: NetworkViewModel = hiltViewModel()){
 
@@ -172,9 +173,11 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
 
     val context = LocalContext.current
 
+    val activity = LocalContext.current as? Activity
+
 
     BackHandler {
-        exitDialog = true
+        exitDialog = !exitDialog
     }
 
 
@@ -205,7 +208,7 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
 
             if (exitDialog){
                 AlertDialog(
-                    onDismissRequest = { /* Prevent dismissal */ },
+                    onDismissRequest = { exitDialog = !exitDialog },
                     title = {
                         Text(
                             text = "Are you sure exit the app ?",
@@ -219,7 +222,7 @@ fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: (
                     dismissButton = {
                         Text(
                             modifier = Modifier.clickable {
-                                navController.popBackStack()
+                                activity?.finish()
                                 exitDialog = !exitDialog
                             },
                             text = "yes",
