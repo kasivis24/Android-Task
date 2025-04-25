@@ -13,8 +13,7 @@ class MainApplication : Application(){
     }
     override fun onCreate() {
         super.onCreate()
-
         Log.d("Screen","initapp")
-        database = Room.databaseBuilder(applicationContext,AppDatabase::class.java,AppDatabase.DATA_NAME).build()
+        database = Room.databaseBuilder(applicationContext,AppDatabase::class.java,AppDatabase.DATABASE_NAME).build()
     }
 }

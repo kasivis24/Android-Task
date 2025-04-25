@@ -6,10 +6,13 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.gson.Gson
+import com.mobile.android_task.data.entities.FileData
 import com.mobile.android_task.ui.theme.constants.AppConstants
 import com.mobile.android_task.ui.theme.screens.DashboardPage
 import com.mobile.android_task.ui.theme.screens.LoginPage
 import com.mobile.android_task.ui.theme.screens.MediaGalleryScreen
+import com.mobile.android_task.ui.theme.screens.PlayerPage
 import com.mobile.android_task.ui.theme.screens.SearchScreen
 import com.mobile.android_task.ui.theme.screens.SignUpPage
 import com.mobile.android_task.ui.theme.screens.SplashScreen
@@ -30,6 +33,16 @@ fun AppNavigation(isDark : Boolean,onChange : () -> Unit,themePreferenceManager:
                 navArgument("folderId") { type = NavType.StringType },
             )
         ){ UploadScreen(navHostController, folderId = it.arguments?.getString("folderId") ?: "",mediaGalleryViewModel) }
+
+        composable("${AppConstants.PLAYER_SCREEN_ROUTE}/{fileDataJson}",
+            arguments = listOf(
+                navArgument("fileDataJson") { type = NavType.StringType },
+            )
+        ){
+            val fileDataJson = it.arguments?.getString("fileDataJson")
+            val fileData = Gson().fromJson(fileDataJson, FileData::class.java)
+            PlayerPage(fileData)
+        }
 
         composable("${AppConstants.MEDIA_SCREEN_ROUTE}/{folderId}/{folderName}",
             arguments = listOf(

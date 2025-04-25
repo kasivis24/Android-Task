@@ -1,5 +1,4 @@
 package com.mobile.android_task.viewmodel
-
 import android.app.Application
 import android.content.Context
 import android.net.ConnectivityManager

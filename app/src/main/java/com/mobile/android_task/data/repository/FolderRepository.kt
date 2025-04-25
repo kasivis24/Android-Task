@@ -11,11 +11,12 @@ class FolderRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    private val auth = FirebaseAuth.getInstance()
-
-    private val userId = auth.currentUser?.uid
 
     fun getData(): LiveData<List<FolderData>> {
+         val auth = FirebaseAuth.getInstance()
+
+         val userId = auth.currentUser?.uid
+
         val liveData = MutableLiveData<List<FolderData>>()
 
         db.collection("folder")

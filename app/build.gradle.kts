@@ -97,6 +97,9 @@ dependencies {
 
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0") // PieChart
 
+    implementation("com.google.code.gson:gson:2.10.1")
+
+
 
 
 

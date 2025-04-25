@@ -1,6 +1,7 @@
 package com.mobile.android_task.ui.theme.screens
 
 import android.Manifest
+import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import android.widget.Toast
@@ -85,9 +86,34 @@ import com.mobile.android_task.viewmodel.NetworkViewModel
 import com.mobile.android_task.viewmodel.SearchViewModel
 import kotlinx.coroutines.launch
 
+//
+//@Composable
+//fun MyComponent(content: @Composable (String) -> Unit) {
+//    Column {
+//        Text("Above the custom content")
+//        content() // Calling the composable lambda
+//        Text("Below the custom content")
+//    }
+//}
+//
+//
+//@Composable
+//fun UsageExample() {
+//    MyComponent {
+//        Text("This is the passed content!")
+//        Text("This is the passed content!")
+//    }
+//}
+
+
+
+
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(navController: NavController,searchViewModel: SearchViewModel = viewModel(),viewModel: NetworkViewModel = hiltViewModel()){
+
 
     val searchQuery = searchViewModel.searchQuery
 

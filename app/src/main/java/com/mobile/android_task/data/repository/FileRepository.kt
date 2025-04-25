@@ -13,11 +13,13 @@ class FileRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
-    private val auth = FirebaseAuth.getInstance()
 
-    private val userId = auth.currentUser?.uid
 
     fun getData(folderid : String): LiveData<List<FileData>> {
+        val auth = FirebaseAuth.getInstance()
+
+        val userId = auth.currentUser?.uid
+
         val liveData = MutableLiveData<List<FileData>>()
 
         db.collection("file")

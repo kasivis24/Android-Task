@@ -45,6 +45,7 @@ interface AppDao{
     @Query("DELETE FROM file where folderId = :folderId AND fileId = :fileId")
     suspend fun removeSingleFilesById(folderId : String,fileId : String)
 
+    // total Size Files
     @Query("SELECT fileType, SUM(fileSize) as totalSize FROM file GROUP BY fileType")
     suspend fun getFileSizesByType(): List<FileSizeData>
 

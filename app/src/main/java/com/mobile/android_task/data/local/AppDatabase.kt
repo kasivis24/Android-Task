@@ -9,7 +9,7 @@ import com.mobile.android_task.data.entities.FolderData
 abstract class AppDatabase : RoomDatabase() {
     abstract fun AppDao(): AppDao
     companion object {
-        const val DATA_NAME = "cloud_database"
+        const val DATABASE_NAME = "cloud_database"
     }
 }
 
