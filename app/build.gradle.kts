@@ -72,7 +72,7 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller) // SystemUiController
 
 
-    implementation(libs.coil.compose) // // Coil for Image Loading
+    implementation(libs.coil.compose)  // Coil for Image Loading
 
 
     implementation("androidx.media3:media3-exoplayer:1.2.0")
@@ -83,6 +83,7 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
+
 
     implementation("com.google.dagger:hilt-android:2.50")
     kapt("com.google.dagger:hilt-android-compiler:2.50")
@@ -98,6 +99,11 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0") // PieChart
 
     implementation("com.google.code.gson:gson:2.10.1")
+
+    implementation ("androidx.compose.material3:material3-window-size-class:1.1.2") // Window Size Class
+
+
+
 
 
 

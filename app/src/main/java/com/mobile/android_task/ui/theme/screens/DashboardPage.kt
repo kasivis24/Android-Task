@@ -125,7 +125,6 @@ import com.mobile.android_task.ui.theme.screens.PieChart as PieChart
 @Composable
 fun DashboardPage(navController: NavController,isDark : Boolean,onChangeTheme: () -> Unit,themePreferenceManager: ThemePreferenceManager,mediaGalleryViewModel: MediaGalleryViewModel,viewModel: NetworkViewModel = hiltViewModel()){
 
-
     var showDialogCreateFolder by remember { mutableStateOf(false) }
     
     var folderName by remember { mutableStateOf("") }

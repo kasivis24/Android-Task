@@ -1,4 +1,6 @@
 package com.mobile.android_task.ui.theme.navigation
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
@@ -20,6 +22,7 @@ import com.mobile.android_task.ui.theme.screens.ThemePreferenceManager
 import com.mobile.android_task.ui.theme.screens.UploadScreen
 import com.mobile.android_task.viewmodel.MediaGalleryViewModel
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AppNavigation(isDark : Boolean,onChange : () -> Unit,themePreferenceManager: ThemePreferenceManager,navHostController: NavHostController,mediaGalleryViewModel: MediaGalleryViewModel){
     NavHost(navController = navHostController, startDestination = AppConstants.SPLASH_SCREEN_ROUTE){
@@ -41,7 +44,7 @@ fun AppNavigation(isDark : Boolean,onChange : () -> Unit,themePreferenceManager:
         ){
             val fileDataJson = it.arguments?.getString("fileDataJson")
             val fileData = Gson().fromJson(fileDataJson, FileData::class.java)
-            PlayerPage(fileData)
+            PlayerPage(fileData,navHostController)
         }
 
         composable("${AppConstants.MEDIA_SCREEN_ROUTE}/{folderId}/{folderName}",

@@ -16,6 +16,7 @@ data class FileData(
     val fileType : String = "",
     val authToken : String = "",
     val fileId : String = "",
+    val uploadedTime : String = "",
 ){
     fun determineFileType(): FileType {
         return when {

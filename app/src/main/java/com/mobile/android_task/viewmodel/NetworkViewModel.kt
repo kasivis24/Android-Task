@@ -17,6 +17,8 @@ class NetworkViewModel @Inject constructor(application: Application) : AndroidVi
     private val _isConnected = mutableStateOf(false)
     val isConnected: State<Boolean> = _isConnected
 
+
+
     private val connectivityManager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {

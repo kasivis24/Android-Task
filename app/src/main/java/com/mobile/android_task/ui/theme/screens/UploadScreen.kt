@@ -1,9 +1,11 @@
 package com.mobile.android_task.ui.theme.screens
 
 import android.net.Uri
+import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -23,6 +25,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.mobile.android_task.R
@@ -61,6 +67,7 @@ import com.mobile.android_task.viewmodel.MediaGalleryViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.min
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun UploadScreen(navController: NavController,folderId : String,mediaGalleryViewModel: MediaGalleryViewModel){
 
@@ -72,11 +79,14 @@ fun UploadScreen(navController: NavController,folderId : String,mediaGalleryView
 
     var filesSelectList = remember { mutableStateListOf<FileData>() }
 
+
     var isProgress by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
     val coroutineScope = rememberCoroutineScope()
+
+    var showDialogCreateFolder by remember { mutableStateOf(false) }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetMultipleContents()
@@ -92,6 +102,71 @@ fun UploadScreen(navController: NavController,folderId : String,mediaGalleryView
 
     Box(modifier = Modifier.fillMaxSize()){
 
+
+        if (showDialogCreateFolder){
+            Dialog(
+                onDismissRequest = {  },
+            ) {
+
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp),
+                ){
+
+
+                    Box(modifier = Modifier.fillMaxSize().padding(15.dp)){
+                        Column (modifier = Modifier.fillMaxSize()){
+                            Text(
+                                modifier = Modifier.padding(vertical = 5.dp),
+                                text = "Files Uploaded Successfully !",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.W900,
+                                fontFamily = gilroy
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(vertical = 5.dp),
+                                text = "Are you want to upload more files ?",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W600,
+                                fontFamily = gilroy
+                            )
+
+
+                            Spacer(Modifier.height(10.dp))
+
+                            Row (modifier = Modifier.fillMaxSize()){
+                                Button(onClick = {
+                                    showDialogCreateFolder = !showDialogCreateFolder
+                                    navController.popBackStack()
+                                },Modifier.padding(horizontal = 5.dp),
+                                    colors = ButtonColors(containerColor = SkyBlue, contentColor = Color.White, disabledContentColor = SkyBlue, disabledContainerColor = Color.White)
+                                    ) {
+                                    Text("Dismiss", color = Color.White)
+                                }
+                                Button(onClick = {
+                                    filesSelectList.clear()
+                                    showDialogCreateFolder = !showDialogCreateFolder
+                                },
+                                    colors = ButtonColors(containerColor = SkyBlue, contentColor = Color.White, disabledContentColor = SkyBlue, disabledContainerColor = Color.White)
+                                ) {
+                                    Text("Continue", color = Color.White)
+                                }
+                            }
+                        }
+                    }
+
+
+
+
+                }
+
+            }
+        }
+
         SnackbarHost(
             hostState = snackbarHostState,
             modifier = Modifier
@@ -102,14 +177,20 @@ fun UploadScreen(navController: NavController,folderId : String,mediaGalleryView
         Box(modifier = Modifier.fillMaxWidth()
             .height(60.dp)
             .clickable {
+
+                var count = 0;
                 if (filesSelectList.isNotEmpty()){
                     isProgress = !isProgress
                     coroutineScope.launch {
                         fileViewModel.uploadTheFiles(filesSelectList,folderId,
                             isSuccess = {
-                                coroutineScope.launch {
-                                    isProgress = !isProgress
-                                    snackbarHostState.showSnackbar("Files are uploaded succesfully")
+                                count += 1
+                                if (count == filesSelectList.size){
+                                    coroutineScope.launch {
+                                        isProgress = !isProgress
+                                        snackbarHostState.showSnackbar("Files are uploaded succesfully")
+                                        showDialogCreateFolder = !showDialogCreateFolder
+                                    }
                                 }
                         },
                             isFailure = {
@@ -218,10 +299,6 @@ fun UploadScreen(navController: NavController,folderId : String,mediaGalleryView
                             fontWeight = FontWeight.W500
                         ),
                     )
-
-
-
-
 
                 }
             }
@@ -335,6 +412,7 @@ fun selectedFilesItem(filedata : FileData,onRemove : (FileData) -> Unit){
 
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun UploadScreenPreview(){

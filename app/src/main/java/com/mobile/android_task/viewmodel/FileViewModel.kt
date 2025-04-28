@@ -2,8 +2,13 @@ package com.mobile.android_task.viewmodel
 
 import android.content.Context
 import android.net.Uri
+import android.os.Build
 import android.provider.OpenableColumns
+import android.text.format.Time
 import android.util.Log
+import android.util.TimeUtils
+import android.widget.TimePicker
+import androidx.annotation.RequiresApi
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -15,6 +20,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.google.type.DateTime
 import com.mobile.android_task.MainApplication
 import com.mobile.android_task.data.entities.FileData
 import com.mobile.android_task.data.entities.FolderData
@@ -26,8 +32,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import java.io.File
 import java.text.SimpleDateFormat
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
+import java.util.Timer
 import kotlin.random.Random
 
 class FileViewModel : ViewModel() {
@@ -45,6 +54,7 @@ class FileViewModel : ViewModel() {
     val auth = FirebaseAuth.getInstance()
 
     val userId = auth.currentUser?.uid
+
 
 
     private val _fileDataLiveDataCloud = MutableLiveData<List<FileData>>()
@@ -111,7 +121,9 @@ class FileViewModel : ViewModel() {
     }
 
 
-    fun uploadTheFiles(allSelectedList : List<FileData>,folderId: String,isSuccess : () -> Unit,isFailure : () -> Unit){
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun uploadTheFiles(allSelectedList : List<FileData>, folderId: String, isSuccess : () -> Unit, isFailure : () -> Unit){
+        val time = LocalTime.now().format(DateTimeFormatter.ofPattern("hh-mm-ss"))
 
         viewModelScope.launch (Dispatchers.IO){
             allSelectedList.forEachIndexed { index, fileData ->
@@ -122,11 +134,12 @@ class FileViewModel : ViewModel() {
                         val docRef = fireStoreDB.collection("file").document()  // generates new doc ref with ID
                         val docId = docRef.id
 
-                        docRef.set(FileData(0,folderId,fileData.fileName,fileData.createdDate,fileData.fileSize,fileUrl.toString(),fileData.fileType,"$userId",docId))
+                        docRef.set(FileData(0,folderId,fileData.fileName,fileData.createdDate,fileData.fileSize,fileUrl.toString(),fileData.fileType,"$userId",docId,"${time}"))
                             .addOnSuccessListener {
                                 viewModelScope.launch(Dispatchers.IO){
                                     Log.d("Log", "File added with ID: $docId")
-                                    database.addFile(FileData(0,folderId,fileData.fileName,fileData.createdDate,fileData.fileSize,fileUrl.toString(),fileData.fileType,"$userId",docId))
+                                    Log.d("Log","$time")
+                                    database.addFile(FileData(0,folderId,fileData.fileName,fileData.createdDate,fileData.fileSize,fileUrl.toString(),fileData.fileType,"$userId",docId,"${time}"))
                                     isSuccess()
                                 }
                             }
@@ -144,12 +157,14 @@ class FileViewModel : ViewModel() {
 
     }
 
+     @RequiresApi(Build.VERSION_CODES.O)
      fun getFileMetadata(context: Context, uri: Uri, folderId : String): FileData {
 
         val contentResolver = context.contentResolver
         var name = "Unknown"
         var size: Long = 0
         var mimeType = contentResolver.getType(uri) ?: "Unknown"
+        val time = LocalTime.now()
 
         contentResolver.query(uri, null, null, null, null)?.use { cursor ->
             val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
@@ -161,8 +176,9 @@ class FileViewModel : ViewModel() {
             }
         }
 
+         Log.d("Time","${time}")
 
-        return FileData(0,folderId,name,todayDate, formatFileSize(size), uri.toString(),mimeType,"$userId")
+        return FileData(0,folderId,name,todayDate, formatFileSize(size), uri.toString(),mimeType,"$userId","${time}")
     }
 
      private fun formatFileSize(size: Long): String {

@@ -2,6 +2,10 @@ package com.mobile.android_task.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -13,6 +17,8 @@ import com.mobile.android_task.data.entities.FolderData
 import com.mobile.android_task.data.entities.PieChartData
 import com.mobile.android_task.data.repository.FolderRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -41,9 +47,30 @@ class MediaGalleryViewModel : ViewModel() {
     private val _pieChartData = MutableLiveData<List<PieChartData>>()
     val pieChartData: LiveData<List<PieChartData>> = _pieChartData
 
+    private val _selectedItem = MutableStateFlow(-1)
+    val selectedItem: StateFlow<Int> = _selectedItem
+
+    private val _selectedFileItem = MutableStateFlow(FileData(0,"","","","","","","",""))
+    val selectedFileItem: StateFlow<FileData> = _selectedFileItem
+
+    private val _isChangeView = MutableStateFlow(false)
+    val isChangeView: StateFlow<Boolean> = _isChangeView
+
 
     init {
         loadPieChartData()
+    }
+
+    fun setItemId(id : Int){
+        _selectedItem.value = id
+    }
+
+    fun changeView(view : Boolean){
+        _isChangeView.value = view
+    }
+
+    fun setFileData(fileData: FileData){
+        _selectedFileItem.value = fileData
     }
 
 
